@@ -9,6 +9,8 @@ class Person:
 
 
 def create_person_list(people: list) -> list:
+    Person.people.clear()
+
     for person_dict in people:
         Person(person_dict["name"], person_dict["age"])
 
@@ -16,16 +18,19 @@ def create_person_list(people: list) -> list:
     for person_dict in people:
         person = Person.people[person_dict["name"]]
 
-        if "wife" in person_dict and person_dict["wife"] is not None:
-            person.wife = Person.people[person_dict["wife"]]
-            # Automatically link back
-            if not hasattr(person.wife, "husband"):
+        wife_name = person_dict.get("wife")
+        husband_name = person_dict.get("husband")
+
+        # Link wife if exists
+        if wife_name and not getattr(person, "wife", None):
+            person.wife = Person.people[wife_name]
+            if not getattr(person.wife, "husband", None):
                 person.wife.husband = person
 
-        if "husband" in person_dict and person_dict["husband"] is not None:
-            person.husband = Person.people[person_dict["husband"]]
-            # Automatically link back
-            if not hasattr(person.husband, "wife"):
+            # Link husband if exists
+        if husband_name and not getattr(person, "husband", None):
+            person.husband = Person.people[husband_name]
+            if not getattr(person.husband, "wife", None):
                 person.husband.wife = person
 
     return list(Person.people.values())
